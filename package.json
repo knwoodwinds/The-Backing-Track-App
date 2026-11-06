@@ -1,6 +1,6 @@
 {
   "name": "the-backing-track-app",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "description": "A practice app with a generated piano, bass and drum band that follows your chord changes.",
   "main": "main.js",
   "author": "The Backing Track App contributors",

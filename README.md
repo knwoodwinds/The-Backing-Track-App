@@ -7,14 +7,17 @@ on every chorus, using the Web Audio API.
 
 ## Features
 
-- Ten built-in tunes: medium blues, minor blues, rhythm changes, Cherokee, a
-  simplified In the Still of the Night, major and minor ii–V–I workouts, a bossa
-  loop, a ballad and a modal vamp
-- Type your own changes (`Dm7 G7 | Cmaj7 | Am7 D7 | ...`)
+- Twelve built-in tunes: medium blues, minor blues, rhythm changes, Cherokee, Giant
+  Steps, After You've Gone, In the Still of the Night, major and minor
+  ii–V–I workouts, a bossa loop, a ballad and a modal vamp
+- Type your own changes (`Dm7 G7 | Cmaj7 | Am7 D7 | ...`). `%` repeats the last bar and
+  slash chords such as `F6/A` work.
 - Any of the 12 keys, tempo from 40 to 260 bpm
 - Chart names for concert, B♭, E♭ and F instruments (the band always plays in concert key)
 - Loop any section of the form: drag across bars, or use **Pick a loop**
 - Swing, bossa and ballad feels, with a swing amount control
+- Two sound engines: the built-in synth, or real instrument samples from a SoundFont
+  file you load (see Sounds below)
 - Band mixer with volume and mute for piano, bass and drums
 - One bar count-in, and a set number of choruses if you want the tune to end by itself
 - Six looks to choose from: System (follows light or dark), Midnight, Smoky club,
@@ -47,6 +50,21 @@ npm run dist:win    # Windows installer and portable .exe
 ```
 
 Files appear in `dist/`.
+
+## Sounds
+
+The band has two sound engines. **Classic synth** is built in and is the default.
+**SoundFont** plays real instrument samples from a file you load.
+
+1. In the **Sound** panel choose **SoundFont**, then **Load a SoundFont file**.
+2. Pick any `.sf2` or `.sf3` file. MuseScore General is a free, realistic choice
+   (search for "MuseScore General soundfont"; the `.sf3` download is the small one).
+3. Choose the piano, bass and drum kit. The app remembers the file for next time.
+
+The app does not ship with a SoundFont, which keeps it small and avoids licence
+questions. The files stay on your computer. The player uses General MIDI numbers:
+pianos 0 to 5, basses 32 to 35, and drum kits on bank 128. It supports volume
+envelopes, loops, filter and pan. It does not do reverb or chorus.
 
 ## Publish downloads from GitHub
 

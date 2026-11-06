@@ -100,6 +100,27 @@
         <div class="mix"><span>Drums</span><input type="range" min="0" max="1" step="0.01" data-vol="drums" aria-label="Drums volume"><button type="button" class="mute" data-mute="drums" aria-pressed="false">Mute</button></div>
       </div>
 
+      <div class="panel wide">
+        <p class="label">Sound</p>
+        <div class="seg" id="engine">
+          <button type="button" data-v="synth">Classic synth</button>
+          <button type="button" data-v="sf">SoundFont</button>
+        </div>
+        <div id="sfbox" hidden>
+          <div class="row">
+            <button type="button" class="btn" id="sfload">Load a SoundFont file</button>
+            <button type="button" class="btn" id="sfclear" hidden>Remove it</button>
+            <input type="file" id="sffile" accept=".sf2,.sf3" hidden>
+          </div>
+          <p class="small" id="sfstatus"></p>
+          <div class="sfsel" id="sfsel" hidden>
+            <label for="sfpiano">Piano<select id="sfpiano"></select></label>
+            <label for="sfbass">Bass<select id="sfbass"></select></label>
+            <label for="sfdrums">Drums<select id="sfdrums"></select></label>
+          </div>
+        </div>
+      </div>
+
       <div class="panel">
         <p class="label">Look</p>
         <div class="looks" id="looks"></div>
@@ -126,6 +147,7 @@
     </section>
   </main>
 </div>
+<script src="soundfont.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
