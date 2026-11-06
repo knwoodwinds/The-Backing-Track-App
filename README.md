@@ -7,6 +7,9 @@ on every chorus, using the Web Audio API.
 
 ## Features
 
+- One screen: a tune library with search on the left, and the whole chart sized to fit
+  the window, so a 72-bar form needs no scrolling. Style, tempo, repeats and key sit in a
+  bar along the bottom. Looks, sound, the band mixer and other extras are in **Options**.
 - Twelve built-in tunes: medium blues, minor blues, rhythm changes, Cherokee, Giant
   Steps, After You've Gone, In the Still of the Night, major and minor
   ii–V–I workouts, a bossa loop, a ballad and a modal vamp

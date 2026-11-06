@@ -10,143 +10,169 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app">
-  <aside>
-    <div class="brand">
-      <svg viewBox="0 0 26 26" fill="currentColor" aria-hidden="true"><rect x="2" y="12" width="4" height="12" rx="2"/><rect x="8" y="5" width="4" height="19" rx="2"/><rect x="14" y="9" width="4" height="15" rx="2"/><rect x="20" y="2" width="4" height="22" rx="2"/></svg>
-      The Backing Track App
+<div class="shell">
+
+  <aside class="lib" id="lib" aria-label="Tune library">
+    <div class="lib-head">
+      <div class="brand">
+        <svg viewBox="0 0 26 26" fill="currentColor" aria-hidden="true"><rect x="2" y="12" width="4" height="12" rx="2"/><rect x="8" y="5" width="4" height="19" rx="2"/><rect x="14" y="9" width="4" height="15" rx="2"/><rect x="20" y="2" width="4" height="22" rx="2"/></svg>
+        The Backing Track App
+      </div>
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input type="search" id="search" placeholder="Search tunes" aria-label="Search tunes" autocomplete="off">
+      </div>
     </div>
-    <p class="tag">A rhythm section that follows your changes, in any key and tempo.</p>
-    <p class="label">Tunes</p>
-    <nav id="tunes" aria-label="Tunes"></nav>
-    <section id="custom" hidden>
+    <nav class="lib-list" id="tunes" aria-label="Tunes"></nav>
+    <section class="lib-custom" id="custom" hidden>
       <p class="label">Your changes</p>
       <textarea id="chordtext" spellcheck="false" aria-label="Chord changes"></textarea>
-      <p class="hint">Separate bars with | and put up to two chords in a bar. Try Dm7, G7, Cmaj7, Bm7b5, E7b9, C6, Fm6, Bdim7.</p>
+      <p class="hint">Separate bars with | and put up to two chords in a bar. Use % to repeat a bar. Try Dm7, G7, Cmaj7, Bm7b5, E7b9, C6, Fm6, F6/A.</p>
       <p id="err" role="alert"></p>
       <button type="button" class="btn" id="applychords">Use these changes</button>
     </section>
   </aside>
 
-  <main class="main">
-    <header class="head">
-      <h1 id="title"></h1>
-      <p id="meta"></p>
+  <main class="stage">
+    <header class="top">
+      <button type="button" class="btn" id="libbtn" aria-label="Show tunes">Tunes</button>
+      <div class="titles">
+        <h1 id="title"></h1>
+        <p id="meta"></p>
+      </div>
+      <button type="button" class="btn" id="opts" aria-label="Options">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Options
+      </button>
     </header>
 
-    <div class="transport">
-      <button type="button" id="play" aria-label="Play">
-        <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
-        <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-      </button>
-      <div class="readout" id="pos" aria-live="off">Ready<small>Space starts and stops</small></div>
-      <span class="spacer"></span>
-      <button type="button" class="btn" id="pick" aria-pressed="false">Pick a loop</button>
-      <button type="button" class="btn" id="clearloop" hidden>Clear loop</button>
-      <button type="button" class="btn" id="restart">Back to bar 1</button>
+    <section class="sheet" id="sheet">
+      <div class="chart" id="chart" aria-label="Chord chart"></div>
+    </section>
+    <div class="chartbar">
+      <p class="hint" id="charthint">Click a bar to start from it. Drag across bars, or hold Shift and click, to loop a section.</p>
+      <div class="loopbtns">
+        <button type="button" class="btn" id="pick" aria-pressed="false">Pick a loop</button>
+        <button type="button" class="btn" id="clearloop" hidden>Clear loop</button>
+        <button type="button" class="btn" id="restart">Back to bar 1</button>
+      </div>
     </div>
 
-    <section>
-      <div class="chart" id="chart" aria-label="Chord chart"></div>
-      <p class="hint" id="charthint">Click a bar to start from it. Drag across bars, or hold Shift and click, to loop a section.</p>
-    </section>
-
-    <section class="deck">
-      <div class="panel">
-        <p class="label">Tempo</p>
-        <div class="tempo">
-          <button type="button" class="step" id="slower" aria-label="Slower">&minus;</button>
-          <div id="bpm"></div>
-          <button type="button" class="step" id="faster" aria-label="Faster">+</button>
-        </div>
-        <div class="row"><input type="range" id="tempo" min="40" max="260" step="1" aria-label="Tempo in beats per minute"></div>
+    <footer class="deck" aria-label="Player controls">
+      <div class="transport">
+        <button type="button" id="play" aria-label="Play">
+          <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
+          <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+        </button>
+        <div class="readout" id="pos" aria-live="off">Ready<small>Space starts and stops</small></div>
       </div>
 
-      <div class="panel">
-        <p class="label">Key (concert pitch)</p>
-        <div class="keys" id="keys"></div>
-        <p class="small" id="written"></p>
-      </div>
-
-      <div class="panel">
-        <p class="label">Read the chart in</p>
-        <div class="seg" id="inst">
-          <button type="button" data-v="concert" title="Concert pitch: piano, guitar, bass, flute">C</button>
-          <button type="button" data-v="bb" title="B-flat: tenor and soprano sax, trumpet, clarinet">B&flat;</button>
-          <button type="button" data-v="eb" title="E-flat: alto and baritone sax">E&flat;</button>
-          <button type="button" data-v="f" title="F: French horn">F</button>
-        </div>
-        <p class="small">The band always plays in concert key. This only changes the names on the chart.</p>
-      </div>
-
-      <div class="panel">
-        <p class="label">Feel</p>
+      <div class="grp g-style">
+        <p class="label">Style</p>
         <div class="seg" id="feel">
           <button type="button" data-v="swing">Swing</button>
           <button type="button" data-v="bossa">Bossa</button>
           <button type="button" data-v="ballad">Ballad</button>
         </div>
-        <div class="row" id="swingrow">
-          <label for="swing">Swing</label>
-          <input type="range" id="swing" min="50" max="75" step="1" aria-label="Swing amount">
-          <span id="swingval" class="small" style="margin:0;min-width:3ch"></span>
+      </div>
+
+      <div class="grp g-tempo">
+        <p class="label">Tempo</p>
+        <div class="tempo">
+          <button type="button" class="step" id="slower" aria-label="Slower">&minus;</button>
+          <div id="bpm"></div>
+          <button type="button" class="step" id="faster" aria-label="Faster">+</button>
+          <input type="range" id="tempo" min="40" max="260" step="1" aria-label="Tempo in beats per minute">
         </div>
       </div>
 
-      <div class="panel">
-        <p class="label">Band</p>
-        <div class="mix"><span>Piano</span><input type="range" min="0" max="1" step="0.01" data-vol="piano" aria-label="Piano volume"><button type="button" class="mute" data-mute="piano" aria-pressed="false">Mute</button></div>
-        <div class="mix"><span>Bass</span><input type="range" min="0" max="1" step="0.01" data-vol="bass" aria-label="Bass volume"><button type="button" class="mute" data-mute="bass" aria-pressed="false">Mute</button></div>
-        <div class="mix"><span>Drums</span><input type="range" min="0" max="1" step="0.01" data-vol="drums" aria-label="Drums volume"><button type="button" class="mute" data-mute="drums" aria-pressed="false">Mute</button></div>
+      <div class="grp g-rep">
+        <label class="label" for="choruses">Repeats</label>
+        <select id="choruses">
+          <option value="0">Until I stop</option>
+          <option value="1">1 chorus</option>
+          <option value="2">2 choruses</option>
+          <option value="3">3 choruses</option>
+          <option value="4">4 choruses</option>
+          <option value="6">6 choruses</option>
+          <option value="8">8 choruses</option>
+        </select>
       </div>
 
-      <div class="panel wide">
-        <p class="label">Sound</p>
-        <div class="seg" id="engine">
-          <button type="button" data-v="synth">Classic synth</button>
-          <button type="button" data-v="sf">SoundFont</button>
-        </div>
-        <div id="sfbox" hidden>
-          <div class="row">
-            <button type="button" class="btn" id="sfload">Load a SoundFont file</button>
-            <button type="button" class="btn" id="sfclear" hidden>Remove it</button>
-            <input type="file" id="sffile" accept=".sf2,.sf3" hidden>
-          </div>
-          <p class="small" id="sfstatus"></p>
-          <div class="sfsel" id="sfsel" hidden>
-            <label for="sfpiano">Piano<select id="sfpiano"></select></label>
-            <label for="sfbass">Bass<select id="sfbass"></select></label>
-            <label for="sfdrums">Drums<select id="sfdrums"></select></label>
-          </div>
-        </div>
+      <div class="grp g-key">
+        <label class="label" for="keysel">Key</label>
+        <select id="keysel"></select>
       </div>
-
-      <div class="panel">
-        <p class="label">Look</p>
-        <div class="looks" id="looks"></div>
-        <p class="small">System follows your computer's light or dark setting.</p>
-      </div>
-
-      <div class="panel">
-        <p class="label">Practice</p>
-        <label class="check"><input type="checkbox" id="countin"> One bar count-in</label>
-        <div class="row">
-          <label for="choruses">Play</label>
-          <select id="choruses">
-            <option value="0">until I stop</option>
-            <option value="1">1 chorus</option>
-            <option value="2">2 choruses</option>
-            <option value="3">3 choruses</option>
-            <option value="4">4 choruses</option>
-            <option value="6">6 choruses</option>
-            <option value="8">8 choruses</option>
-          </select>
-        </div>
-        <p class="small">The band improvises its comping and bass lines fresh on every chorus.</p>
-      </div>
-    </section>
+    </footer>
   </main>
 </div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<aside class="drawer" id="drawer" hidden aria-label="Options">
+  <div class="drawer-head">
+    <h2>Options</h2>
+    <button type="button" class="btn" id="closeopts">Done</button>
+  </div>
+
+  <div class="panel">
+    <p class="label">Look</p>
+    <div class="looks" id="looks"></div>
+    <p class="small">System follows your computer's light or dark setting.</p>
+  </div>
+
+  <div class="panel">
+    <p class="label">Sound</p>
+    <div class="seg" id="engine">
+      <button type="button" data-v="synth">Classic synth</button>
+      <button type="button" data-v="sf">SoundFont</button>
+    </div>
+    <div id="sfbox" hidden>
+      <div class="row">
+        <button type="button" class="btn" id="sfload">Load a SoundFont file</button>
+        <button type="button" class="btn" id="sfclear" hidden>Remove it</button>
+        <input type="file" id="sffile" accept=".sf2,.sf3" hidden>
+      </div>
+      <p class="small" id="sfstatus"></p>
+      <div class="sfsel" id="sfsel" hidden>
+        <label for="sfpiano">Piano<select id="sfpiano"></select></label>
+        <label for="sfbass">Bass<select id="sfbass"></select></label>
+        <label for="sfdrums">Drums<select id="sfdrums"></select></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="label">Band</p>
+    <div class="mix"><span>Piano</span><input type="range" min="0" max="1" step="0.01" data-vol="piano" aria-label="Piano volume"><button type="button" class="mute" data-mute="piano" aria-pressed="false">Mute</button></div>
+    <div class="mix"><span>Bass</span><input type="range" min="0" max="1" step="0.01" data-vol="bass" aria-label="Bass volume"><button type="button" class="mute" data-mute="bass" aria-pressed="false">Mute</button></div>
+    <div class="mix"><span>Drums</span><input type="range" min="0" max="1" step="0.01" data-vol="drums" aria-label="Drums volume"><button type="button" class="mute" data-mute="drums" aria-pressed="false">Mute</button></div>
+    <div class="row" id="swingrow">
+      <label for="swing">Swing</label>
+      <input type="range" id="swing" min="50" max="75" step="1" aria-label="Swing amount">
+      <span id="swingval" class="small" style="margin:0;min-width:3ch"></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="label">Read the chart in</p>
+    <div class="seg" id="inst">
+      <button type="button" data-v="concert" title="Concert pitch: piano, guitar, bass, flute">C</button>
+      <button type="button" data-v="bb" title="B-flat: tenor and soprano sax, trumpet, clarinet">B&flat;</button>
+      <button type="button" data-v="eb" title="E-flat: alto and baritone sax">E&flat;</button>
+      <button type="button" data-v="f" title="F: French horn">F</button>
+    </div>
+    <p class="small" id="written"></p>
+    <p class="small">The band always plays in concert key. This only changes the names on the chart.</p>
+  </div>
+
+  <div class="panel">
+    <p class="label">Practice</p>
+    <label class="check"><input type="checkbox" id="countin"> One bar count-in</label>
+    <label class="check" style="margin-top:10px"><input type="checkbox" id="showrep"> Show % for repeated bars</label>
+    <p class="small">The band improvises its comping and bass lines fresh on every chorus.</p>
+  </div>
+</aside>
+
 <script src="soundfont.js"></script>
 <script src="app.js"></script>
 </body>
