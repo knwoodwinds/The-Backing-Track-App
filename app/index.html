@@ -22,7 +22,12 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
         <input type="search" id="search" placeholder="Search tunes" aria-label="Search tunes" autocomplete="off">
       </div>
+      <div class="seg" id="libtabs">
+        <button type="button" data-v="all" aria-pressed="true">All tunes</button>
+        <button type="button" data-v="fav" aria-pressed="false">Favourites <span id="favcount"></span></button>
+      </div>
     </div>
+    <p class="empty" id="favempty" hidden>No favourites yet. Tap the star next to a tune to add it here.</p>
     <nav class="lib-list" id="tunes" aria-label="Tunes"></nav>
     <section class="lib-custom" id="custom" hidden>
       <p class="label">Your changes</p>
@@ -40,6 +45,7 @@
         <h1 id="title"></h1>
         <p id="meta"></p>
       </div>
+      <button type="button" class="btn star" id="favtop" aria-label="Add to favourites" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.8l6-.8z"/></svg></button>
       <button type="button" class="btn" id="opts" aria-label="Options">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Options
       </button>
@@ -48,59 +54,67 @@
     <section class="sheet" id="sheet">
       <div class="chart" id="chart" aria-label="Chord chart"></div>
     </section>
-    <div class="chartbar">
-      <p class="hint" id="charthint">Click a bar to start from it. Drag across bars, or hold Shift and click, to loop a section.</p>
-      <div class="loopbtns">
-        <button type="button" class="btn" id="pick" aria-pressed="false">Pick a loop</button>
-        <button type="button" class="btn" id="clearloop" hidden>Clear loop</button>
-        <button type="button" class="btn" id="restart">Back to bar 1</button>
-      </div>
-    </div>
+    <p class="hint" id="charthint" hidden></p>
 
     <footer class="deck" aria-label="Player controls">
-      <div class="transport">
-        <button type="button" id="play" aria-label="Play">
-          <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
-          <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-        </button>
+      <div class="dk-controls">
+        <div class="grp g-style">
+          <div class="seg" id="feel">
+            <button type="button" data-v="swing">Swing</button>
+            <button type="button" data-v="bossa">Bossa</button>
+            <button type="button" data-v="ballad">Ballad</button>
+            <button type="button" data-v="groove">Groove</button>
+          </div>
+          <label class="label">Style</label>
+        </div>
+        <div class="grp g-tempo">
+          <div class="tempo">
+            <button type="button" class="step" id="slower" aria-label="Slower">&minus;</button>
+            <input type="text" id="bpm" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Tempo in beats per minute">
+            <button type="button" class="step" id="faster" aria-label="Faster">+</button>
+          </div>
+          <label class="label" for="bpm">Tempo</label>
+        </div>
+        <div class="grp g-rep">
+          <select id="choruses" aria-label="Repeats">
+            <option value="0">Until I stop</option>
+            <option value="1">1 chorus</option>
+            <option value="2">2 choruses</option>
+            <option value="3">3 choruses</option>
+            <option value="4">4 choruses</option>
+            <option value="6">6 choruses</option>
+            <option value="8">8 choruses</option>
+          </select>
+          <label class="label" for="choruses">Repeats</label>
+        </div>
+        <div class="grp g-key">
+          <select id="keysel" aria-label="Key"></select>
+          <label class="label" for="keysel">Key</label>
+        </div>
+      </div>
+
+      <div class="dk-bar">
         <div class="readout" id="pos" aria-live="off">Ready<small>Space starts and stops</small></div>
-      </div>
-
-      <div class="grp g-style">
-        <p class="label">Style</p>
-        <div class="seg" id="feel">
-          <button type="button" data-v="swing">Swing</button>
-          <button type="button" data-v="bossa">Bossa</button>
-          <button type="button" data-v="ballad">Ballad</button>
+        <div class="transport">
+          <button type="button" id="stop" aria-label="Stop"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg></button>
+          <button type="button" id="play" aria-label="Play">
+            <svg class="ico-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
+            <svg class="ico-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          </button>
+          <button type="button" id="mixbtn" aria-label="Band mixer" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 4v16M12 4v16M18 4v16"/><circle cx="6" cy="14" r="2.3" fill="currentColor"/><circle cx="12" cy="8" r="2.3" fill="currentColor"/><circle cx="18" cy="15" r="2.3" fill="currentColor"/></svg></button>
+        </div>
+        <div class="loopbtns">
+          <button type="button" class="btn" id="pick" aria-pressed="false">Pick a loop</button>
+          <button type="button" class="btn" id="clearloop" hidden>Clear loop</button>
+          <button type="button" class="btn" id="restart">Restart</button>
         </div>
       </div>
 
-      <div class="grp g-tempo">
-        <p class="label">Tempo</p>
-        <div class="tempo">
-          <button type="button" class="step" id="slower" aria-label="Slower">&minus;</button>
-          <div id="bpm"></div>
-          <button type="button" class="step" id="faster" aria-label="Faster">+</button>
-          <input type="range" id="tempo" min="40" max="260" step="1" aria-label="Tempo in beats per minute">
-        </div>
-      </div>
-
-      <div class="grp g-rep">
-        <label class="label" for="choruses">Repeats</label>
-        <select id="choruses">
-          <option value="0">Until I stop</option>
-          <option value="1">1 chorus</option>
-          <option value="2">2 choruses</option>
-          <option value="3">3 choruses</option>
-          <option value="4">4 choruses</option>
-          <option value="6">6 choruses</option>
-          <option value="8">8 choruses</option>
-        </select>
-      </div>
-
-      <div class="grp g-key">
-        <label class="label" for="keysel">Key</label>
-        <select id="keysel"></select>
+      <div class="mixer" id="mixer" hidden role="group" aria-label="Band mixer">
+        <div class="mix"><span>Piano</span><input type="range" min="0" max="1" step="0.01" data-vol="piano" aria-label="Piano volume"><button type="button" class="mute" data-mute="piano" aria-pressed="false">Mute</button></div>
+        <div class="mix"><span>Bass</span><input type="range" min="0" max="1" step="0.01" data-vol="bass" aria-label="Bass volume"><button type="button" class="mute" data-mute="bass" aria-pressed="false">Mute</button></div>
+        <div class="mix"><span>Drums</span><input type="range" min="0" max="1" step="0.01" data-vol="drums" aria-label="Drums volume"><button type="button" class="mute" data-mute="drums" aria-pressed="false">Mute</button></div>
+        <div class="mix" id="swingrow"><span>Swing</span><input type="range" id="swing" min="50" max="75" step="1" aria-label="Swing amount"><span id="swingval" class="small" style="margin:0;min-width:3ch"></span></div>
       </div>
     </footer>
   </main>
@@ -142,18 +156,6 @@
   </div>
 
   <div class="panel">
-    <p class="label">Band</p>
-    <div class="mix"><span>Piano</span><input type="range" min="0" max="1" step="0.01" data-vol="piano" aria-label="Piano volume"><button type="button" class="mute" data-mute="piano" aria-pressed="false">Mute</button></div>
-    <div class="mix"><span>Bass</span><input type="range" min="0" max="1" step="0.01" data-vol="bass" aria-label="Bass volume"><button type="button" class="mute" data-mute="bass" aria-pressed="false">Mute</button></div>
-    <div class="mix"><span>Drums</span><input type="range" min="0" max="1" step="0.01" data-vol="drums" aria-label="Drums volume"><button type="button" class="mute" data-mute="drums" aria-pressed="false">Mute</button></div>
-    <div class="row" id="swingrow">
-      <label for="swing">Swing</label>
-      <input type="range" id="swing" min="50" max="75" step="1" aria-label="Swing amount">
-      <span id="swingval" class="small" style="margin:0;min-width:3ch"></span>
-    </div>
-  </div>
-
-  <div class="panel">
     <p class="label">Read the chart in</p>
     <div class="seg" id="inst">
       <button type="button" data-v="concert" title="Concert pitch: piano, guitar, bass, flute">C</button>
@@ -169,7 +171,8 @@
     <p class="label">Practice</p>
     <label class="check"><input type="checkbox" id="countin"> One bar count-in</label>
     <label class="check" style="margin-top:10px"><input type="checkbox" id="showrep"> Show % for repeated bars</label>
-    <p class="small">The band improvises its comping and bass lines fresh on every chorus.</p>
+    <p class="small">Click a bar to start from it. Drag across bars, or hold Shift and click, to loop a section.</p>
+    <p class="small">The band improvises its comping and bass lines fresh on every chorus. Piano, bass, drums and swing are in the mixer button next to play.</p>
   </div>
 </aside>
 

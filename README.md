@@ -13,9 +13,11 @@ on every chorus, using the Web Audio API.
 - Twelve built-in tunes: medium blues, minor blues, rhythm changes, Cherokee, Giant
   Steps, After You've Gone, In the Still of the Night, major and minor
   ii–V–I workouts, a bossa loop, a ballad and a modal vamp
+- Favourites: tap the star next to a tune, or the star at the top, then switch the library
+  to **Favourites** to see only those. They are remembered between sessions.
 - Type your own changes (`Dm7 G7 | Cmaj7 | Am7 D7 | ...`). `%` repeats the last bar and
   slash chords such as `F6/A` work.
-- Any of the 12 keys, tempo from 40 to 260 bpm
+- Any of the 12 keys, tempo from 40 to 400 bpm
 - Chart names for concert, B♭, E♭ and F instruments (the band always plays in concert key)
 - Loop any section of the form: drag across bars, or use **Pick a loop**
 - Swing, bossa and ballad feels, with a swing amount control
@@ -126,3 +128,7 @@ npm install --save-dev electron@latest electron-builder@latest
 ## License
 
 MIT. See `LICENSE`.
+
+## Odd meters
+
+A tune can set its own time signature (and change it bar by bar). Harrisburg is in 7/4 with chords every 3.5 beats, and bars 19 to 21 switch to 6/4 and 5/4. Odd-meter bars always use the straight-eighth Groove feel, and the chart shows a small badge where the meter changes.

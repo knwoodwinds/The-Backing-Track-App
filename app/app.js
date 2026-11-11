@@ -20,7 +20,12 @@ var Q={
   sus:{sym:'sus',t:[0,5,7,10],v:[5,7,10,14]},
   '7alt':{sym:'7alt',t:[0,4,8,10],v:[4,10,13,20]},
   '7#5':{sym:'7\u266F5',t:[0,4,8,10],v:[4,8,10,14]},
-  '7#11':{sym:'7\u266F11',t:[0,4,7,10],v:[4,10,14,18]}
+  '7#11':{sym:'7\u266F11',t:[0,4,7,10],v:[4,10,14,18]},
+  maj9:{sym:'maj9',t:[0,4,7,11],v:[4,7,11,14]},
+  m9:{sym:'m9',t:[0,3,7,10],v:[3,7,10,14]},
+  '9':{sym:'9',t:[0,4,7,10],v:[4,10,14,19]},
+  add9:{sym:'add9',t:[0,4,7,2],v:[4,7,12,14]},
+  '7sus':{sym:'7sus',t:[0,5,7,10],v:[5,10,14,19]}
 };
 
 /* tunes: chords are [degree in semitones above the tonic, quality] */
@@ -90,8 +95,8 @@ var TUNES=[
 /* custom chart parser */
 var SUF={'':'maj','maj':'maj','M':'maj','m':'m','min':'m','-':'m','7':'7','maj7':'maj7','M7':'maj7','ma7':'maj7','Δ':'maj7','Δ7':'maj7',
  'm7':'m7','min7':'m7','-7':'m7','m7b5':'m7b5','ø':'m7b5','ø7':'m7b5','m7♭5':'m7b5','dim':'dim7','dim7':'dim7','o7':'dim7','°7':'dim7','°':'dim7',
- '7#5':'7#5','7+':'7#5','7\u266F5':'7#5','7#11':'7#11','7\u266F11':'7#11','6':'6','69':'6','6/9':'6','m6':'m6','min6':'m6','7b9':'7b9','7♭9':'7b9','7alt':'7alt','alt':'7alt','sus':'sus','sus4':'sus','7sus':'sus','7sus4':'sus',
- '9':'7','11':'7','13':'7','m9':'m7','m11':'m7','maj9':'maj7'};
+ '7#5':'7#5','7+':'7#5','7\u266F5':'7#5','7#11':'7#11','7\u266F11':'7#11','6':'6','69':'6','6/9':'6','m6':'m6','min6':'m6','7b9':'7b9','7♭9':'7b9','7alt':'7alt','alt':'7alt','sus':'sus','sus4':'sus','7sus':'7sus','7sus4':'7sus','add9':'add9','maj9':'maj9','m9':'m9','9':'9',
+ '11':'7','13':'7','m11':'m7'};
 var LET={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 function parseChord(s){
   var m=/^([A-Ga-g])([#b♯♭]?)(.*)$/.exec(s); if(!m) return null;
@@ -110,10 +115,10 @@ function parseChord(s){
   var out=[((pc%12)+12)%12,q]; if(bass!==null) out.push(bass);
   return out;
 }
-function parseChart(text){
+function parseChart(text,ft,max){
   var segs=text.replace(/\r/g,'').split(/[|\n]/).map(function(s){return s.trim()}).filter(Boolean);
   if(!segs.length) return {error:'Type at least one bar of chords.'};
-  if(segs.length>64) return {error:'That is more than 64 bars. Try a shorter form.'};
+  if(segs.length>(max||64)) return {error:'That is more than 64 bars. Try a shorter form.'};
   var abs=[];
   for(var i=0;i<segs.length;i++){
     if(segs[i]==='%'){ if(!abs.length) return {error:'Bar 1 cannot be a repeat sign.'}; abs.push(abs[abs.length-1]); continue; }
@@ -127,24 +132,64 @@ function parseChart(text){
     }
     abs.push(bar);
   }
-  var tonic=abs[0][0][0];
+  var tonic=(ft===undefined)?abs[0][0][0]:ft;
   return {tonic:tonic,bars:abs.map(function(b){return b.map(function(c){var o=[((c[0]-tonic)+12)%12,c[1]]; if(c.length>2) o.push(((c[2]-tonic)+12)%12); return o;})})};
 }
+
+/* standards written as chord text, in the key given */
+function fromText(o){
+  var tonic=parseChord(o.key)[0], c=parseChart(o.text,tonic,200);
+  if(c.error) throw new Error(o.name+': '+c.error);
+  return {name:o.name,form:o.form,style:o.style,tempo:o.tempo,key:tonic,bars:c.bars,marks:o.marks,meter:o.meter,bm:o.bm};
+}
+var NEWTUNES=[
+  fromText({name:'Blue Bossa',form:'16-bar minor bossa',style:'bossa',tempo:140,key:'C',marks:{0:'A',8:'B'},
+    text:'Cm7 | Cm7 | Fm7 | Fm7 | Dm7b5 | G7b9 | Cm7 | Cm7 | Ebm7 | Ab7 | Dbmaj7 | Dbmaj7 | Dm7b5 | G7b9 | Cm7 | Dm7b5 G7b9'}),
+  fromText({name:'All the Things You Are',form:'36 bars',style:'swing',tempo:130,key:'Ab',marks:{0:'A',8:'A',16:'B',24:'A'},
+    text:'Fm7 | Bbm7 | Eb7 | Abmaj7 | Dbmaj7 | Dm7 G7 | Cmaj7 | Cmaj7 | '+
+         'Cm7 | Fm7 | Bb7 | Ebmaj7 | Abmaj7 | Am7 D7 | Gmaj7 | Gmaj7 | '+
+         'Am7 | D7 | Gmaj7 | Gmaj7 | F#m7 | B7 | Emaj7 | C7#5 | '+
+         'Fm7 | Bbm7 | Eb7 | Abmaj7 | Dbmaj7 | Dbm7 | Cm7 | Bdim7 | Bbm7 | Eb7 | Abmaj7 | Abmaj7'}),
+  fromText({name:'Autumn Leaves',form:'32 bars, check the last 8',style:'swing',tempo:130,key:'G',marks:{0:'A',8:'A',16:'B',24:'C'},
+    text:'Cm7 | F7 | Bbmaj7 | Ebmaj7 | Am7b5 | D7b9 | Gm | Gm | '+
+         'Cm7 | F7 | Bbmaj7 | Ebmaj7 | Am7b5 | D7b9 | Gm | Gm | '+
+         'Am7b5 | D7b9 | Gm | Gm | Cm7 | F7 | Bbmaj7 | Ebmaj7 | '+
+         'Am7b5 | D7b9 | Gm | Eb7 | Am7b5 | D7b9 | Gm | Gm'}),
+  fromText({name:'The Girl from Ipanema',form:'32 bars',style:'bossa',tempo:128,key:'F',marks:{0:'A',8:'A',16:'B',24:'B'},
+    text:'Fmaj7 | Fmaj7 | G7 | G7 | Gm7 | Gb7 | Fmaj7 | Gb7 | '+
+         'Fmaj7 | Fmaj7 | G7 | G7 | Gm7 | Gb7 | Fmaj7 | Gb7 | '+
+         'Gbmaj7 | Gbmaj7 | B7 | B7 | F#m7 | F#m7 | D7 | D7 | '+
+         'Gm7 | Gm7 | Eb7 | Eb7 | Am7 | D7b9 | Gm7 | C7b9'}),
+  fromText({name:'So What',form:'32 bars, D Dorian',style:'swing',tempo:138,key:'D',marks:{0:'A',16:'B',24:'A'},
+    text:'Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | '+
+         'Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7'}),
+  fromText({name:'Blues for Alice',form:'12-bar Parker blues',style:'swing',tempo:150,key:'F',
+    text:'Fmaj7 | Em7b5 A7 | Dm7 G7 | Cm7 F7 | Bb7 | Bbm7 Eb7 | Am7 | Abm7 Db7 | Gm7 | C7 | Fmaj7 D7 | Gm7 C7'}),
+  fromText({name:'Harrisburg',form:'7/4 groove, concert pitch, bars 19–21 guessed',style:'groove',tempo:150,key:'C',meter:7,bm:{19:6,20:5},marks:{0:'In',2:'A',18:'T',21:'B'},
+    text:'Cm7 Fm9 | Abmaj9 Bbadd9 | '+
+         new Array(9).join('Cm7 Fm9 | Abmaj9 Bbadd9 | ')+
+         'Cm7 Fm9 | Abmaj9 Bbadd9 | Bbadd9 | '+
+         new Array(3).join('Bbm7 Eb9 | Gb9 Ab7sus | ')+
+         new Array(5).join('Cm7 F9 | Ab9 Bb7sus | ')})
+];
+Array.prototype.splice.apply(TUNES,[7,0].concat(NEWTUNES));
 var DEFAULT_TEXT='Dm7 G7 | Cmaj7 A7 | Dm7 G7 | Cmaj7 |\nEm7b5 A7 | Dm7 | Gm7 C7 | Fmaj7';
 var first=parseChart(DEFAULT_TEXT);
 TUNES.push({name:'Your changes',form:'Type any progression',style:'swing',tempo:120,key:first.tonic,bars:first.bars,custom:true});
 
 /* state */
-var S={ti:0,bars:[],key:5,tempo:130,inst:'concert',style:'swing',swing:0.667,
+var S={ti:0,bars:[],meter:4,bm:{},key:5,tempo:130,inst:'concert',style:'swing',swing:0.667,
   vol:{piano:0.8,bass:0.85,drums:0.7},mute:{piano:false,bass:false,drums:false},
-  countIn:true,choruses:0,look:'system',rep:true,sound:'synth',sfp:{piano:0,bass:32,drums:32},loop:null,cursor:0,playing:false,pick:false};
+  countIn:true,choruses:0,look:'system',rep:true,favs:[],sound:'synth',sfp:{piano:0,bass:32,drums:32},loop:null,cursor:0,playing:false,pick:false};
 try{
   var saved=JSON.parse(localStorage.getItem('backingtrackapp')||'null');
   if(saved){ ['inst','countIn','choruses','look','rep','sound'].forEach(function(k){ if(saved[k]!==undefined) S[k]=saved[k] });
-    if(saved.vol) S.vol=Object.assign(S.vol,saved.vol); if(saved.mute) S.mute=Object.assign(S.mute,saved.mute); if(saved.sfp) S.sfp=Object.assign(S.sfp,saved.sfp); }
+    if(saved.vol) S.vol=Object.assign(S.vol,saved.vol); if(saved.mute) S.mute=Object.assign(S.mute,saved.mute); if(saved.sfp) S.sfp=Object.assign(S.sfp,saved.sfp); if(Array.isArray(saved.favs)) S.favs=saved.favs.filter(function(x){return typeof x==='string'}); }
 }catch(e){}
-function save(){ try{ localStorage.setItem('backingtrackapp',JSON.stringify({inst:S.inst,countIn:S.countIn,choruses:S.choruses,look:S.look,rep:S.rep,sound:S.sound,sfp:S.sfp,vol:S.vol,mute:S.mute})) }catch(e){} }
+function save(){ try{ localStorage.setItem('backingtrackapp',JSON.stringify({inst:S.inst,countIn:S.countIn,choruses:S.choruses,look:S.look,rep:S.rep,favs:S.favs,sound:S.sound,sfp:S.sfp,vol:S.vol,mute:S.mute})) }catch(e){} }
 
+function nbOf(bar){return S.bm[bar]||S.meter}
+function splitAt(n){return n===7?3.5:n===5?3:n/2}
 function absRoot(ch){return (ch[0]+S.key)%12}
 function absBass(ch){return ch.length>2?(ch[2]+S.key)%12:absRoot(ch)}
 function chordHTML(ch){
@@ -275,11 +320,27 @@ function walk(ch,nxt,len){
   var tr=absRoot(nxt); add((tr+(Math.random()<0.5?1:11))%12);
   lastBass=p; return out;
 }
+var STAB={4:[0,1,2,3],7:[0,1,2,3.5,4.5,5.5],6:[0,1.5,3,4.5],5:[0,1,2,3,4]};
+var GR={4:{a:[0,2,4,6],k:[0,4],s:[2,6]},7:{a:[0,2,4,7,9,11],k:[0,4,7,11],s:[2,9]},6:{a:[0,2,4,6,8,10],k:[0,6],s:[4,10]},5:{a:[0,2,4,6,8],k:[0,6],s:[4,9]}};
 var PAT_SWING=[[0,3],[3],[3,6],[1,5],[0,5],[2,7],[3,5],[0,3,6]];
 var CLAVE=[0,1.5,3,5,6];
 function makePlan(bar){
-  var cs=S.bars[bar], two=cs.length>1, st=S.style, off=(st==='swing')?S.swing:0.5;
+  var cs=S.bars[bar], two=cs.length>1, N=nbOf(bar), st=(N!==4)?'groove':S.style, off=(st==='swing')?S.swing:0.5;
   var P={bar:bar,comp:[],bass:[]};
+  if(st==='groove'){
+    var SP=splitAt(N), ps=STAB[N]||STAB[4];
+    ps.forEach(function(p,n){
+      var ci=(two&&p>=SP)?1:0, end=(two&&p<SP)?SP:N, nx=ps[n+1], stop=(nx!==undefined&&nx<end)?nx:end;
+      P.comp.push({pos:p,notes:voicing(cs[ci]),dur:Math.max(0.5,(stop-p)*0.92),vel:(n===0?0.95:0.75)*(0.92+Math.random()*0.12)});
+    });
+    cs.forEach(function(ch,seg){
+      var base=two?seg*SP:0, L=two?(seg?N-SP:SP):N, r0=absBass(ch);
+      var m=bassNear(r0,lastBass); lastBass=m;
+      P.bass.push({pos:base,m:m,dur:Math.max(1,L*0.8),vel:0.9});
+      if(L>=2){ var m2=bassNear(r0,lastBass); lastBass=m2; P.bass.push({pos:base+L-0.5,m:m2,dur:0.4,vel:0.7}); }
+    });
+    return P;
+  }
   var pos=function(i){return (i%2)?Math.floor(i/2)+off:i/2};
   var idxs;
   if(st==='swing') idxs=two?rnd([[0,4],[0,3,4],[0,4,7]]):rnd(PAT_SWING);
@@ -310,8 +371,16 @@ function makePlan(bar){
   return P;
 }
 function drums(t,bar,beat,spb){
-  var st=S.style;
-  if(st==='swing'){
+  var N=nbOf(bar), st=(N!==4)?'groove':S.style;
+  if(st==='groove'){
+    var g=GR[N]||GR[4];
+    for(var h=0;h<2;h++){
+      var e=beat*2+h, tt=t+h*0.5*spb;
+      hat(tt,g.a.indexOf(e)>=0?0.34:0.17);
+      if(g.k.indexOf(e)>=0) kick(tt,0.3);
+      if(g.s.indexOf(e)>=0){ brush(tt,0.16,0.62); rim(tt,0.3); }
+    }
+  }else if(st==='swing'){
     var off=S.swing*spb;
     ride(t,beat===0?0.8:0.62);
     if(beat%2){ ride(t+off,0.4); hatFoot(t,0.6); }
@@ -338,16 +407,16 @@ function playBeat(t,beat,spb){
 }
 
 /* ---------- scheduler ---------- */
-var timer=null,nextT=0,cur={bar:0,beat:0,chorus:1},plan=null,evQ=[],counting=0,finishing=false,jump=null;
+var cinTotal=4,timer=null,nextT=0,cur={bar:0,beat:0,chorus:1},plan=null,evQ=[],counting=0,finishing=false,jump=null;
 function step(){
   var spb=60/S.tempo;
-  if(counting>0){ click(nextT,counting===4); evQ.push({t:nextT,count:5-counting}); counting--; nextT+=spb; return; }
+  if(counting>0){ click(nextT,counting===cinTotal); evQ.push({t:nextT,count:cinTotal+1-counting}); counting--; nextT+=spb; return; }
   if(jump!==null){ cur.bar=Math.min(jump,S.bars.length-1); cur.beat=0; jump=null; }
   if(cur.beat===0||!plan||plan.bar!==cur.bar) plan=makePlan(cur.bar);
   evQ.push({t:nextT,bar:cur.bar,beat:cur.beat,chorus:cur.chorus});
   playBeat(nextT,cur.beat,spb);
   nextT+=spb; cur.beat++;
-  if(cur.beat>3){
+  if(cur.beat>=nbOf(cur.bar)){
     cur.beat=0; cur.bar++;
     var b=loopBounds();
     if(cur.bar>b[1]){ cur.bar=b[0]; cur.chorus++;
@@ -368,7 +437,7 @@ function start(){
 function begin(){
   newSession();
   cur={bar:Math.min(S.cursor,S.bars.length-1),beat:0,chorus:1};
-  jump=null; counting=S.countIn?4:0; finishing=false; evQ.length=0; lastBass=36; plan=null;
+  jump=null; cinTotal=nbOf(cur.bar); counting=S.countIn?cinTotal:0; finishing=false; evQ.length=0; lastBass=36; plan=null;
   nextT=ctx.currentTime+0.12; S.playing=true;
   timer=setInterval(pump,25); pump(); paintTransport(); paintMarks();
 }
@@ -380,6 +449,9 @@ function stop(){
 }
 
 /* ---------- UI ---------- */
+var typing=false;
+var tuneBtns=[],favBtns=[],tuneRows=[],libTab='all',libQ='';
+var STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.8l6-.8z"/></svg>';
 var chart=$('#chart'),wrap=$('#sheet'),nowEl=null,drag=null,pickStart=null,lastEv=null;
 function clearNow(){ if(nowEl){ nowEl.classList.remove('now'); nowEl.removeAttribute('data-beat'); nowEl=null; } }
 function setNow(bar,beat){
@@ -401,8 +473,7 @@ function renderChart(){
   chart.innerHTML=S.bars.map(function(cs,i){
     var rp=S.rep&&i>0&&!marks[i]&&sameBar(cs,S.bars[i-1]);
     return '<button type="button" class="bar'+(cs.length>1?' two':'')+(marks[i]?' hasmk':'')+'" data-i="'+i+'" aria-label="Bar '+(i+1)+'">'+
-      (marks[i]?'<span class="mk">'+marks[i]+'</span>':'')+'<span class="num">'+(i+1)+'</span>'+
-      '<span class="chs">'+(rp?'<span class="rp">%</span>':cs.map(chordHTML).join(''))+'</span><span class="dots"><i></i><i></i><i></i><i></i></span></button>';
+      (marks[i]?'<span class="mk">'+marks[i]+'</span>':'')+((i===0?nbOf(0)!==4:nbOf(i)!==nbOf(i-1))?'<span class="ts">'+nbOf(i)+'/4</span>':'')+'<span class="chs">'+(rp?'<span class="rp">%</span>':cs.map(chordHTML).join(''))+'</span></button>';
   }).join('');
   nowEl=null; paintMarks();
 }
@@ -422,26 +493,28 @@ function paintTransport(){
 function setPos(main,sub){ $('#pos').innerHTML=main+'<small>'+sub+'</small>'; }
 function writtenKeyName(){ return NOTE[(S.key+OFF[S.inst])%12]; }
 function paintMeta(){
-  var t=TUNES[S.ti], names={swing:'Swing',bossa:'Bossa',ballad:'Ballad'};
+  var t=TUNES[S.ti], names={swing:'Swing',bossa:'Bossa',ballad:'Ballad',groove:'Groove'};
   $('#title').textContent=t.name;
-  var s=S.bars.length+' bars · '+names[S.style]+' · concert key '+NOTE[S.key];
+  var s=S.bars.length+' bars · '+(S.meter!==4?S.meter+'/4 · ':'')+names[S.style]+' · concert key '+NOTE[S.key];
   if(S.inst!=='concert') s+=' · you read '+writtenKeyName();
   $('#meta').textContent=s;
   $('#written').textContent=S.inst==='concert'?'Chart is shown at concert pitch.':'Concert '+NOTE[S.key]+' is '+writtenKeyName()+' on your instrument.';
-  $('#bpm').innerHTML=S.tempo+'<small>bpm</small>'; $('#tempo').value=S.tempo;
+  if(!typing) $('#bpm').value=S.tempo;
   $('#keysel').value=String(S.key);
   var i;
   var ib=$('#inst').children; for(i=0;i<ib.length;i++) ib[i].setAttribute('aria-pressed',String(ib[i].dataset.v===S.inst));
   var fb=$('#feel').children; for(i=0;i<fb.length;i++) fb[i].setAttribute('aria-pressed',String(fb[i].dataset.v===S.style));
   $('#swingrow').hidden=S.style!=='swing';
   $('#swing').value=Math.round(S.swing*100); $('#swingval').textContent=Math.round(S.swing*100)+'%';
-  var tb=$('#tunes').children; for(i=0;i<tb.length;i++) tb[i].setAttribute('aria-pressed',String(i===S.ti));
+  for(i=0;i<tuneBtns.length;i++) tuneBtns[i].setAttribute('aria-pressed',String(i===S.ti));
+  paintFavs();
   $('#custom').hidden=!TUNES[S.ti].custom;
-  $('#charthint').textContent=S.pick?(pickStart===null?'Tap the first bar of the section to loop.':'Now tap the last bar of the section.'):'Click a bar to start from it. Drag across bars, or hold Shift and click, to loop a section.';
+  $('#charthint').hidden=!S.pick;
+  $('#charthint').textContent=S.pick?(pickStart===null?'Click the first bar of the section to loop.':'Now click the last bar of the section.'):'';
   $('#pick').setAttribute('aria-pressed',String(S.pick));
 }
 function loadTune(i){
-  stop(); var t=TUNES[i]; S.ti=i; S.bars=t.bars; S.key=t.key; S.tempo=t.tempo; S.style=t.style;
+  stop(); var t=TUNES[i]; S.ti=i; S.bars=t.bars; S.key=t.key; S.tempo=t.tempo; S.style=t.style; S.meter=t.meter||4; S.bm=t.bm||{};
   S.loop=null; S.cursor=0; S.pick=false; pickStart=null;
   wrap.scrollTop=0; renderChart(); paintMeta(); setPos('Ready','Space starts and stops');
 }
@@ -452,9 +525,17 @@ function jumpTo(i){ if(S.playing) jump=i; else S.cursor=i; paintMarks(); }
 (function(){
   var tn=$('#tunes');
   TUNES.forEach(function(t,i){
+    var row=document.createElement('div'); row.className='tunerow';
     var b=document.createElement('button'); b.type='button'; b.className='tune';
     b.innerHTML='<span class="t1"><b>'+t.name+'</b><em>'+t.tempo+' bpm \u00B7 '+NOTE[t.key]+'</em></span><span class="t2">'+t.form+'</span>';
-    b.addEventListener('click',function(){loadTune(i);closePanels();}); tn.appendChild(b);
+    b.addEventListener('click',function(){loadTune(i);closePanels();});
+    row.appendChild(b); tuneBtns.push(b); tuneRows.push(row);
+    if(!t.custom){
+      var f=document.createElement('button'); f.type='button'; f.className='fav star'; f.innerHTML=STAR;
+      f.addEventListener('click',function(){toggleFav(t.name);});
+      row.appendChild(f); favBtns[i]=f;
+    }
+    tn.appendChild(row);
   });
   var ks=$('#keysel');
   NOTE.forEach(function(n,i){
@@ -464,10 +545,40 @@ function jumpTo(i){ if(S.playing) jump=i; else S.cursor=i; paintMarks(); }
 })();
 
 $('#keysel').addEventListener('change',function(e){S.key=+e.target.value;renderChart();paintMeta();});
-$('#search').addEventListener('input',function(e){
-  var q=e.target.value.trim().toLowerCase(), kids=$('#tunes').children;
-  for(var i=0;i<kids.length;i++){ var t=TUNES[i]; kids[i].hidden=!!q&&(t.name+' '+t.form).toLowerCase().indexOf(q)<0; }
+function isFav(n){return S.favs.indexOf(n)>=0}
+function toggleFav(n){
+  var i=S.favs.indexOf(n);
+  if(i>=0) S.favs.splice(i,1); else S.favs.push(n);
+  save(); paintFavs(); filterLib();
+}
+function paintFavs(){
+  for(var i=0;i<favBtns.length;i++){
+    if(!favBtns[i]) continue;
+    var on=isFav(TUNES[i].name);
+    favBtns[i].setAttribute('aria-pressed',String(on));
+    favBtns[i].setAttribute('aria-label',(on?'Remove ':'Add ')+TUNES[i].name+(on?' from favourites':' to favourites'));
+  }
+  $('#favcount').textContent=S.favs.length?'('+S.favs.length+')':'';
+  var t=TUNES[S.ti], on2=isFav(t.name);
+  $('#favtop').hidden=!!t.custom;
+  $('#favtop').setAttribute('aria-pressed',String(on2));
+  $('#favtop').setAttribute('aria-label',on2?'Remove from favourites':'Add to favourites');
+}
+function filterLib(){
+  for(var i=0;i<tuneRows.length;i++){
+    var t=TUNES[i], hit=!libQ||(t.name+' '+t.form).toLowerCase().indexOf(libQ)>=0;
+    tuneRows[i].hidden=!(hit&&(libTab==='all'||isFav(t.name)));
+  }
+  $('#favempty').hidden=!(libTab==='fav'&&!S.favs.length);
+}
+$('#search').addEventListener('input',function(e){ libQ=e.target.value.trim().toLowerCase(); filterLib(); });
+$('#libtabs').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  libTab=b.dataset.v;
+  var bs=$('#libtabs').children; for(var i=0;i<bs.length;i++) bs[i].setAttribute('aria-pressed',String(bs[i].dataset.v===libTab));
+  filterLib();
 });
+$('#favtop').addEventListener('click',function(){ toggleFav(TUNES[S.ti].name); });
 $('#showrep').checked=S.rep;
 $('#showrep').addEventListener('change',function(e){S.rep=e.target.checked;save();renderChart();});
 function closePanels(){ $('#drawer').hidden=true; $('#scrim').hidden=true; document.body.classList.remove('libopen'); }
@@ -481,9 +592,41 @@ window.addEventListener('resize',layoutChart);
 $('#inst').addEventListener('click',function(e){var b=e.target.closest('button'); if(!b)return; S.inst=b.dataset.v; save(); renderChart(); paintMeta();});
 $('#feel').addEventListener('click',function(e){var b=e.target.closest('button'); if(!b)return; S.style=b.dataset.v; plan=null; paintMeta();});
 $('#swing').addEventListener('input',function(e){S.swing=e.target.value/100; paintMeta();});
-$('#tempo').addEventListener('input',function(e){S.tempo=+e.target.value; paintMeta();});
-$('#slower').addEventListener('click',function(){S.tempo=Math.max(40,S.tempo-4);paintMeta();});
-$('#faster').addEventListener('click',function(){S.tempo=Math.min(260,S.tempo+4);paintMeta();});
+function setTempo(v){ S.tempo=Math.max(40,Math.min(400,Math.round(v))); paintMeta(); }
+/* plus/minus: one click is one BPM; hold and it speeds up */
+function holdStep(btn,d){
+  var t=null,n=0;
+  function tick(){ setTempo(S.tempo+d); n++; t=setTimeout(tick,n===1?320:n<10?70:n<30?32:12); }
+  function end(){ clearTimeout(t); t=null; }
+  btn.addEventListener('pointerdown',function(e){
+    if(e.button>0) return; e.preventDefault(); end(); n=0; tick();
+    try{ btn.setPointerCapture(e.pointerId); }catch(x){}
+  });
+  ['pointerup','pointercancel','lostpointercapture','blur'].forEach(function(ev){ btn.addEventListener(ev,end); });
+  btn.addEventListener('contextmenu',function(e){e.preventDefault();});
+  btn.addEventListener('click',function(e){ if(e.detail===0) setTempo(S.tempo+d); });
+}
+holdStep($('#slower'),-1); holdStep($('#faster'),1);
+(function(){
+  var tin=$('#bpm');
+  function commit(){ typing=false; var v=parseInt(tin.value,10); if(isNaN(v)) paintMeta(); else setTempo(v); tin.value=S.tempo; }
+  tin.addEventListener('focus',function(){ typing=true; if(tin.select) tin.select(); });
+  tin.addEventListener('input',function(){ tin.value=tin.value.replace(/\D/g,'').slice(0,3); });
+  tin.addEventListener('blur',commit);
+  tin.addEventListener('keydown',function(e){
+    if(e.code==='Enter'||e.code==='NumpadEnter'){ e.preventDefault(); commit(); tin.blur(); }
+    else if(e.code==='Escape'){ typing=false; paintMeta(); tin.blur(); }
+    else if(e.code==='ArrowUp'||e.code==='ArrowDown'){ e.preventDefault(); typing=false; setTempo(S.tempo+(e.code==='ArrowUp'?1:-1)*(e.shiftKey?10:1)); tin.value=S.tempo; if(tin.select) tin.select(); typing=true; }
+  });
+})();
+$('#stop').addEventListener('click',function(){ stop(); S.cursor=S.loop?S.loop.lo:0; paintMarks(); setPos('Ready','Space starts and stops'); });
+function closeMixer(){ $('#mixer').hidden=true; $('#mixbtn').setAttribute('aria-expanded','false'); }
+$('#mixbtn').addEventListener('click',function(){ var o=$('#mixer').hidden; $('#mixer').hidden=!o; $('#mixbtn').setAttribute('aria-expanded',String(o)); });
+document.addEventListener('pointerdown',function(e){
+  if($('#mixer').hidden) return;
+  if(e.target.closest&&(e.target.closest('#mixer')||e.target.closest('#mixbtn'))) return;
+  closeMixer();
+});
 $('#countin').checked=S.countIn;
 $('#countin').addEventListener('change',function(e){S.countIn=e.target.checked;save();});
 $('#choruses').value=String(S.choruses);
@@ -530,12 +673,12 @@ window.addEventListener('pointerup',function(){
 });
 window.addEventListener('pointercancel',function(){ drag=null; paintMarks(); });
 window.addEventListener('keydown',function(e){
-  if(e.code==='Escape') closePanels();
+  if(e.code==='Escape'){ closePanels(); closeMixer(); }
   var tag=(e.target.tagName||'').toLowerCase();
   if(tag==='textarea'||tag==='input'||tag==='select') return;
   if(e.code==='Space'){ e.preventDefault(); S.playing?stop():start(); }
-  else if(e.code==='ArrowUp'){ e.preventDefault(); S.tempo=Math.min(260,S.tempo+2); paintMeta(); }
-  else if(e.code==='ArrowDown'){ e.preventDefault(); S.tempo=Math.max(40,S.tempo-2); paintMeta(); }
+  else if(e.code==='ArrowUp'){ e.preventDefault(); setTempo(S.tempo+1); }
+  else if(e.code==='ArrowDown'){ e.preventDefault(); setTempo(S.tempo-1); }
 });
 
 function frame(){
