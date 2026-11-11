@@ -165,12 +165,12 @@ var NEWTUNES=[
          'Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Ebm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7 | Dm7'}),
   fromText({name:'Blues for Alice',form:'12-bar Parker blues',style:'swing',tempo:150,key:'F',
     text:'Fmaj7 | Em7b5 A7 | Dm7 G7 | Cm7 F7 | Bb7 | Bbm7 Eb7 | Am7 | Abm7 Db7 | Gm7 | C7 | Fmaj7 D7 | Gm7 C7'}),
-  fromText({name:'Harrisburg',form:'7/4 groove, concert pitch, bars 19–21 guessed',style:'groove',tempo:150,key:'C',meter:7,bm:{19:6,20:5},marks:{0:'In',2:'A',18:'T',21:'B'},
-    text:'Cm7 Fm9 | Abmaj9 Bbadd9 | '+
-         new Array(9).join('Cm7 Fm9 | Abmaj9 Bbadd9 | ')+
-         'Cm7 Fm9 | Abmaj9 Bbadd9 | Bbadd9 | '+
-         new Array(3).join('Bbm7 Eb9 | Gb9 Ab7sus | ')+
-         new Array(5).join('Cm7 F9 | Ab9 Bb7sus | ')})
+  fromText({name:'Harrisburg',form:'7/4 groove, bars 19–21 guessed',style:'groove',tempo:155,key:'D',meter:7,bm:{19:6,20:5},marks:{0:'In',2:'A',18:'T',21:'B'},
+    text:'Dm7 Gm9 | Bbmaj9 Cadd9 | '+
+         new Array(9).join('Dm7 Gm9 | Bbmaj9 Cadd9 | ')+
+         'Dm7 Gm9 | Bbmaj9 Cadd9 | Cadd9 | '+
+         new Array(3).join('Cm7 F9 | Ab9 Bb7sus | ')+
+         new Array(5).join('Dm7 G9 | Bb9 C7sus | ')})
 ];
 Array.prototype.splice.apply(TUNES,[7,0].concat(NEWTUNES));
 var DEFAULT_TEXT='Dm7 G7 | Cmaj7 A7 | Dm7 G7 | Cmaj7 |\nEm7b5 A7 | Dm7 | Gm7 C7 | Fmaj7';
